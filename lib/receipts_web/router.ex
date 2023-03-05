@@ -5,8 +5,18 @@ defmodule ReceiptsWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/api", ReceiptsWeb do
+  scope "/api" do
     pipe_through :api
+
+    forward "/graphql", Absinthe.Plug,
+      schema: ReceiptsWeb.Graphql.Schema,
+      context: %{current_user: nil}
+
+    if Mix.env() == :dev do
+      forward "/graphiql", Absinthe.Plug.GraphiQL,
+        schema: ReceiptsWeb.Graphql.Schema,
+        interface: :playground
+    end
   end
 
   # Enables LiveDashboard only for development
