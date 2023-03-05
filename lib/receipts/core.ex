@@ -118,6 +118,35 @@ defmodule Receipts.Core do
   end
 
   @doc """
+    Returns the list of receipts matching the given `criteria`.
+
+  ## Parameters
+
+    - criteria: The criteria to match the clients with.
+
+  ## Examples
+
+      iex> list_receipts([{:limit, 10}, {:offset, 20}, {:order, :asc}])
+      [%Receipt{}, ...]
+
+  """
+  def list_receipts(criteria) do
+    query = from(p in Receipt)
+
+    Enum.reduce(criteria, query, fn
+      {:limit, limit}, query ->
+        from(p in query, limit: ^limit)
+
+      {:offset, offset}, query ->
+        from(p in query, offset: ^offset)
+
+      {:order, order}, query ->
+        from(p in query, order_by: [{^order, :id}])
+    end)
+    |> Repo.all()
+  end
+
+  @doc """
   Gets a single receipt.
 
   Raises `Ecto.NoResultsError` if the Receipt does not exist.
